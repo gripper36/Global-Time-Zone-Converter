@@ -321,7 +321,7 @@
         
         <div class="cities-container">
             <div class="city-block">
-                <div class="city-name" id="city1Name">Geelong, Australia</div>
+                <div class="city-name" id="city1Name">Select City 1</div>
                 <div class="clock-container">
                     <div class="clock" id="clock1">
                         <div class="clock-center"></div>
@@ -335,7 +335,7 @@
             </div>
 
             <div class="city-block">
-                <div class="city-name" id="city2Name">Austin, Texas</div>
+                <div class="city-name" id="city2Name">Select City 2</div>
                 <div class="clock-container">
                     <div class="clock" id="clock2">
                         <div class="clock-center"></div>
@@ -462,8 +462,8 @@
         ];
 
         let selectedCities = {
-            city1: cities.find(c => c.name === "Geelong"),
-            city2: cities.find(c => c.name === "Austin")
+            city1: cities.find(c => c.name === "London"),
+            city2: cities.find(c => c.name === "New York")
         };
 
         function filterCities(query) {
@@ -685,9 +685,13 @@
         document.getElementById('city1Search').addEventListener('input', () => showSuggestions('city1Search', 'city1Suggestions', 'city1'));
         document.getElementById('city2Search').addEventListener('input', () => showSuggestions('city2Search', 'city2Suggestions', 'city2'));
         
-        // Initialize search fields with default cities
-        document.getElementById('city1Search').value = `${selectedCities.city1.name}, ${selectedCities.city1.country}`;
-        document.getElementById('city2Search').value = `${selectedCities.city2.name}, ${selectedCities.city2.country}`;
+        // Initialize search fields with empty placeholders
+        document.getElementById('city1Search').value = "";
+        document.getElementById('city2Search').value = "";
+        
+        // Set default city names
+        document.getElementById('city1Name').textContent = `${selectedCities.city1.name}, ${selectedCities.city1.country}`;
+        document.getElementById('city2Name').textContent = `${selectedCities.city2.name}, ${selectedCities.city2.country}`;
         
         // Hide suggestions when clicking outside
         document.addEventListener('click', (e) => {
