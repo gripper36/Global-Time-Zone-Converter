@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual City Time Zone Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .cities-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .city-block {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            flex: 1;
+            min-width: 300px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .city-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .clock-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+        }
+
+        .clock {
+            width: 100%;
+            height: 100%;
+            border: 6px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .clock-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 5px;
+        }
+
+        .hour-hand {
+            width: 4px;
+            height: 60px;
+            background: white;
+            margin-left: -2px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .minute-hand {
+            width: 2px;
+            height: 80px;
+            background: white;
+            margin-left: -1px;
+            box-shadow: 0 0 3px rgba(0,0,0,0.5);
+        }
+
+        .second-hand {
+            width: 1px;
+            height: 90px;
+            background: #ff4757;
+            margin-left: -0.5px;
+            box-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+
+        .number {
+            position: absolute;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .digital-time {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-info {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin: 10px 0;
+        }
+
+        .slider-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .time-slider {
+            width: 100%;
+            max-width: 600px;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        .time-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .time-slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .slider-label {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .current-time-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            margin: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .city-search-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .city-search {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .city-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .city-search:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: #333;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            transition: background-color 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .current-time-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .cities-container {
+                flex-direction: column;
+            }
+            
+            .city-block {
+                min-width: auto;
+            }
+            
+            .city-search-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Global Time Zone Converter</h1>
+        
+        <div class="city-search-container">
+            <div class="search-group">
+                <label>First City:</label>
+                <input type="text" id="city1Search" class="city-search" placeholder="Search for a city...">
+                <div id="city1Suggestions" class="suggestions"></div>
+            </div>
+            <div class="search-group">
+                <label>Second City:</label>
+                <input type="text" id="city2Search" class="city-search" placeholder="Search for a city...">
+                <div id="city2Suggestions" class="suggestions"></div>
+            </div>
+        </div>
+        
+        <div class="cities-container">
+            <div class="city-block">
+                <div class="city-name" id="city1Name">Geelong, Australia</div>
+                <div class="clock-container">
+                    <div class="clock" id="clock1">
+                        <div class="clock-center"></div>
+                        <div class="hand hour-hand" id="hour1"></div>
+                        <div class="hand minute-hand" id="minute1"></div>
+                        <div class="hand second-hand" id="second1"></div>
+                    </div>
+                </div>
+                <div class="digital-time" id="time1">12:00:00</div>
+                <div class="date-info" id="date1">Friday, August 15, 2025</div>
+            </div>
+
+            <div class="city-block">
+                <div class="city-name" id="city2Name">Austin, Texas</div>
+                <div class="clock-container">
+                    <div class="clock" id="clock2">
+                        <div class="clock-center"></div>
+                        <div class="hand hour-hand" id="hour2"></div>
+                        <div class="hand minute-hand" id="minute2"></div>
+                        <div class="hand second-hand" id="second2"></div>
+                    </div>
+                </div>
+                <div class="digital-time" id="time2">12:00:00</div>
+                <div class="date-info" id="date2">Thursday, August 14, 2025</div>
+            </div>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-label">Slide to explore different times</div>
+            <input type="range" id="timeSlider" class="time-slider" min="0" max="1440" value="720" step="15">
+            <div>
+                <button class="current-time-btn" onclick="setCurrentTime()">Set to Current Time</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive city database with time zones
+        const cities = [
+            // Australia
+            { name: "Sydney", country: "Australia", timezone: 10, dst: true },
+            { name: "Melbourne", country: "Australia", timezone: 10, dst: true },
+            { name: "Geelong", country: "Australia", timezone: 10, dst: true },
+            { name: "Brisbane", country: "Australia", timezone: 10, dst: false },
+            { name: "Perth", country: "Australia", timezone: 8, dst: false },
+            { name: "Adelaide", country: "Australia", timezone: 9.5, dst: true },
+            { name: "Canberra", country: "Australia", timezone: 10, dst: true },
+            { name: "Darwin", country: "Australia", timezone: 9.5, dst: false },
+            
+            // USA
+            { name: "New York", country: "USA", timezone: -5, dst: true },
+            { name: "Los Angeles", country: "USA", timezone: -8, dst: true },
+            { name: "Chicago", country: "USA", timezone: -6, dst: true },
+            { name: "Austin", country: "USA", timezone: -6, dst: true },
+            { name: "Houston", country: "USA", timezone: -6, dst: true },
+            { name: "Miami", country: "USA", timezone: -5, dst: true },
+            { name: "Seattle", country: "USA", timezone: -8, dst: true },
+            { name: "Denver", country: "USA", timezone: -7, dst: true },
+            { name: "Phoenix", country: "USA", timezone: -7, dst: false },
+            { name: "Las Vegas", country: "USA", timezone: -8, dst: true },
+            { name: "San Francisco", country: "USA", timezone: -8, dst: true },
+            { name: "Boston", country: "USA", timezone: -5, dst: true },
+            { name: "Washington DC", country: "USA", timezone: -5, dst: true },
+            { name: "Atlanta", country: "USA", timezone: -5, dst: true },
+            { name: "Dallas", country: "USA", timezone: -6, dst: true },
+            
+            // Europe
+            { name: "London", country: "UK", timezone: 0, dst: true },
+            { name: "Paris", country: "France", timezone: 1, dst: true },
+            { name: "Berlin", country: "Germany", timezone: 1, dst: true },
+            { name: "Rome", country: "Italy", timezone: 1, dst: true },
+            { name: "Madrid", country: "Spain", timezone: 1, dst: true },
+            { name: "Amsterdam", country: "Netherlands", timezone: 1, dst: true },
+            { name: "Vienna", country: "Austria", timezone: 1, dst: true },
+            { name: "Zurich", country: "Switzerland", timezone: 1, dst: true },
+            { name: "Stockholm", country: "Sweden", timezone: 1, dst: true },
+            { name: "Oslo", country: "Norway", timezone: 1, dst: true },
+            { name: "Copenhagen", country: "Denmark", timezone: 1, dst: true },
+            { name: "Helsinki", country: "Finland", timezone: 2, dst: true },
+            { name: "Warsaw", country: "Poland", timezone: 1, dst: true },
+            { name: "Prague", country: "Czech Republic", timezone: 1, dst: true },
+            { name: "Budapest", country: "Hungary", timezone: 1, dst: true },
+            { name: "Brussels", country: "Belgium", timezone: 1, dst: true },
+            { name: "Dublin", country: "Ireland", timezone: 0, dst: true },
+            { name: "Lisbon", country: "Portugal", timezone: 0, dst: true },
+            { name: "Athens", country: "Greece", timezone: 2, dst: true },
+            { name: "Moscow", country: "Russia", timezone: 3, dst: false },
+            
+            // Asia
+            { name: "Tokyo", country: "Japan", timezone: 9, dst: false },
+            { name: "Seoul", country: "South Korea", timezone: 9, dst: false },
+            { name: "Beijing", country: "China", timezone: 8, dst: false },
+            { name: "Shanghai", country: "China", timezone: 8, dst: false },
+            { name: "Hong Kong", country: "Hong Kong", timezone: 8, dst: false },
+            { name: "Singapore", country: "Singapore", timezone: 8, dst: false },
+            { name: "Bangkok", country: "Thailand", timezone: 7, dst: false },
+            { name: "Mumbai", country: "India", timezone: 5.5, dst: false },
+            { name: "New Delhi", country: "India", timezone: 5.5, dst: false },
+            { name: "Kolkata", country: "India", timezone: 5.5, dst: false },
+            { name: "Dubai", country: "UAE", timezone: 4, dst: false },
+            { name: "Riyadh", country: "Saudi Arabia", timezone: 3, dst: false },
+            { name: "Tel Aviv", country: "Israel", timezone: 2, dst: true },
+            { name: "Istanbul", country: "Turkey", timezone: 3, dst: false },
+            { name: "Jakarta", country: "Indonesia", timezone: 7, dst: false },
+            { name: "Manila", country: "Philippines", timezone: 8, dst: false },
+            { name: "Kuala Lumpur", country: "Malaysia", timezone: 8, dst: false },
+            { name: "Ho Chi Minh City", country: "Vietnam", timezone: 7, dst: false },
+            
+            // Canada
+            { name: "Toronto", country: "Canada", timezone: -5, dst: true },
+            { name: "Vancouver", country: "Canada", timezone: -8, dst: true },
+            { name: "Montreal", country: "Canada", timezone: -5, dst: true },
+            { name: "Calgary", country: "Canada", timezone: -7, dst: true },
+            { name: "Ottawa", country: "Canada", timezone: -5, dst: true },
+            
+            // South America
+            { name: "São Paulo", country: "Brazil", timezone: -3, dst: false },
+            { name: "Rio de Janeiro", country: "Brazil", timezone: -3, dst: false },
+            { name: "Buenos Aires", country: "Argentina", timezone: -3, dst: false },
+            { name: "Lima", country: "Peru", timezone: -5, dst: false },
+            { name: "Bogotá", country: "Colombia", timezone: -5, dst: false },
+            { name: "Santiago", country: "Chile", timezone: -4, dst: true },
+            { name: "Caracas", country: "Venezuela", timezone: -4, dst: false },
+            
+            // Africa
+            { name: "Cairo", country: "Egypt", timezone: 2, dst: false },
+            { name: "Cape Town", country: "South Africa", timezone: 2, dst: false },
+            { name: "Johannesburg", country: "South Africa", timezone: 2, dst: false },
+            { name: "Lagos", country: "Nigeria", timezone: 1, dst: false },
+            { name: "Nairobi", country: "Kenya", timezone: 3, dst: false },
+            { name: "Casablanca", country: "Morocco", timezone: 1, dst: true },
+            
+            // New Zealand & Pacific
+            { name: "Auckland", country: "New Zealand", timezone: 12, dst: true },
+            { name: "Wellington", country: "New Zealand", timezone: 12, dst: true },
+            { name: "Fiji", country: "Fiji", timezone: 12, dst: true },
+            { name: "Honolulu", country: "Hawaii", timezone: -10, dst: false }
+        ];
+
+        let selectedCities = {
+            city1: cities.find(c => c.name === "Geelong"),
+            city2: cities.find(c => c.name === "Austin")
+        };
+
+        function filterCities(query) {
+            if (!query || query.length < 2) return [];
+            return cities.filter(city => 
+                city.name.toLowerCase().includes(query.toLowerCase()) ||
+                city.country.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 8); // Limit to 8 results
+        }
+
+        function showSuggestions(inputId, suggestionsId, cityKey) {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+            const query = input.value;
+            
+            if (query.length < 2) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            const filteredCities = filterCities(query);
+            
+            if (filteredCities.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestions.innerHTML = filteredCities.map(city => 
+                `<div class="suggestion-item" data-city='${JSON.stringify(city)}'>
+                    ${city.name}, ${city.country}
+                </div>`
+            ).join('');
+            
+            suggestions.style.display = 'block';
+            
+            // Add click listeners
+            suggestions.querySelectorAll('.suggestion-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const cityData = JSON.parse(item.dataset.city);
+                    selectedCities[cityKey] = cityData;
+                    input.value = `${cityData.name}, ${cityData.country}`;
+                    suggestions.style.display = 'none';
+                    updateCityDisplay(cityKey);
+                    updateAllTimes();
+                });
+            });
+        }
+
+        function updateCityDisplay(cityKey) {
+            const cityNum = cityKey === 'city1' ? '1' : '2';
+            const city = selectedCities[cityKey];
+            document.getElementById(`city${cityNum}Name`).textContent = `${city.name}, ${city.country}`;
+        }
+
+        function calculateTimeOffset(city) {
+            // Simple DST calculation - in August, DST is active in Southern Hemisphere, inactive in Northern
+            const now = new Date();
+            const month = now.getMonth(); // 0-11
+            let offset = city.timezone;
+            
+            // August is month 7 (0-indexed)
+            if (city.dst) {
+                if (city.timezone > 0) { // Southern hemisphere (like Australia)
+                    if (month >= 3 && month <= 8) offset += 0; // Winter time
+                    else offset += 1; // Summer time
+                } else { // Northern hemisphere
+                    if (month >= 2 && month <= 9) offset += 1; // DST active
+                }
+            }
+            
+            return offset;
+        }
+        // Add clock numbers
+        function addClockNumbers() {
+            const clocks = ['clock1', 'clock2'];
+            clocks.forEach(clockId => {
+                const clock = document.getElementById(clockId);
+                for (let i = 1; i <= 12; i++) {
+                    const number = document.createElement('div');
+                    number.className = 'number';
+                    number.textContent = i;
+                    
+                    const angle = (i - 3) * 30; // Start from 12 o'clock
+                    const x = 85 * Math.cos(angle * Math.PI / 180);
+                    const y = 85 * Math.sin(angle * Math.PI / 180);
+                    
+                    number.style.left = `calc(50% + ${x}px - 8px)`;
+                    number.style.top = `calc(50% + ${y}px - 8px)`;
+                    
+                    clock.appendChild(number);
+                }
+            });
+        }
+
+        function updateClock(clockNum, hours, minutes, seconds) {
+            const hourHand = document.getElementById(`hour${clockNum}`);
+            const minuteHand = document.getElementById(`minute${clockNum}`);
+            const secondHand = document.getElementById(`second${clockNum}`);
+
+            // Calculate angles
+            const hourAngle = (hours % 12) * 30 + minutes * 0.5;
+            const minuteAngle = minutes * 6 + seconds * 0.1;
+            const secondAngle = seconds * 6;
+
+            // Apply rotations
+            hourHand.style.transform = `rotate(${hourAngle}deg)`;
+            minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
+            secondHand.style.transform = `rotate(${secondAngle}deg)`;
+        }
+
+        function formatTime(hours, minutes, seconds) {
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function formatDate(date) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const dayName = days[date.getDay()];
+            const monthName = months[date.getMonth()];
+            const day = date.getDate();
+            const year = date.getFullYear();
+            
+            return `${dayName}, ${monthName} ${day}, ${year}`;
+        }
+
+        function updateTimes() {
+            const sliderValue = parseInt(document.getElementById('timeSlider').value);
+            
+            // Convert slider value to hours and minutes
+            const totalMinutes = sliderValue;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const seconds = 0;
+            
+            // Create base time for city1
+            const city1Time = new Date();
+            city1Time.setHours(hours, minutes, seconds, 0);
+            
+            // Calculate city2 time based on timezone difference
+            const city1Offset = calculateTimeOffset(selectedCities.city1);
+            const city2Offset = calculateTimeOffset(selectedCities.city2);
+            const offsetDifference = (city2Offset - city1Offset) * 60 * 60 * 1000; // Convert to milliseconds
+            const city2Time = new Date(city1Time.getTime() + offsetDifference);
+            
+            // Update displays
+            updateClock(1, city1Time.getHours(), city1Time.getMinutes(), city1Time.getSeconds());
+            document.getElementById('time1').textContent = formatTime(city1Time.getHours(), city1Time.getMinutes(), city1Time.getSeconds());
+            document.getElementById('date1').textContent = formatDate(city1Time);
+            
+            updateClock(2, city2Time.getHours(), city2Time.getMinutes(), city2Time.getSeconds());
+            document.getElementById('time2').textContent = formatTime(city2Time.getHours(), city2Time.getMinutes(), city2Time.getSeconds());
+            document.getElementById('date2').textContent = formatDate(city2Time);
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            
+            // Calculate current time for both cities
+            const city1Offset = calculateTimeOffset(selectedCities.city1);
+            const city2Offset = calculateTimeOffset(selectedCities.city2);
+            
+            // Assuming the browser time is the reference, calculate offsets
+            const browserOffset = -now.getTimezoneOffset() / 60; // Browser timezone in hours
+            
+            const city1Time = new Date(now.getTime() + (city1Offset - browserOffset) * 60 * 60 * 1000);
+            const city2Time = new Date(now.getTime() + (city2Offset - browserOffset) * 60 * 60 * 1000);
+            
+            // Update displays
+            updateClock(1, city1Time.getHours(), city1Time.getMinutes(), city1Time.getSeconds());
+            document.getElementById('time1').textContent = formatTime(city1Time.getHours(), city1Time.getMinutes(), city1Time.getSeconds());
+            document.getElementById('date1').textContent = formatDate(city1Time);
+            
+            updateClock(2, city2Time.getHours(), city2Time.getMinutes(), city2Time.getSeconds());
+            document.getElementById('time2').textContent = formatTime(city2Time.getHours(), city2Time.getMinutes(), city2Time.getSeconds());
+            document.getElementById('date2').textContent = formatDate(city2Time);
+            
+            // Update slider to match city1 time
+            const currentMinutes = city1Time.getHours() * 60 + city1Time.getMinutes();
+            document.getElementById('timeSlider').value = currentMinutes;
+        }
+
+        function updateAllTimes() {
+            if (isManualMode) {
+                updateTimes();
+            } else {
+                updateCurrentTime();
+            }
+        }
+
+        // Control modes
+        let isManualMode = false;
+        let autoUpdateInterval;
+
+        function startAutoUpdate() {
+            if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+            autoUpdateInterval = setInterval(updateCurrentTime, 1000);
+        }
+
+        function stopAutoUpdate() {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+                autoUpdateInterval = null;
+            }
+        }
+
+        function setCurrentTime() {
+            isManualMode = false;
+            updateCurrentTime();
+            startAutoUpdate(); // Resume live updates
+        }
+
+        // Initialize
+        addClockNumbers();
+        updateCurrentTime();
+        startAutoUpdate();
+        
+        // Set up search functionality
+        document.getElementById('city1Search').addEventListener('input', () => showSuggestions('city1Search', 'city1Suggestions', 'city1'));
+        document.getElementById('city2Search').addEventListener('input', () => showSuggestions('city2Search', 'city2Suggestions', 'city2'));
+        
+        // Initialize search fields with default cities
+        document.getElementById('city1Search').value = `${selectedCities.city1.name}, ${selectedCities.city1.country}`;
+        document.getElementById('city2Search').value = `${selectedCities.city2.name}, ${selectedCities.city2.country}`;
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-group')) {
+                document.getElementById('city1Suggestions').style.display = 'none';
+                document.getElementById('city2Suggestions').style.display = 'none';
+            }
+        });
+        
+        // Add slider event listener
+        document.getElementById('timeSlider').addEventListener('input', () => {
+            if (!isManualMode) {
+                isManualMode = true;
+                stopAutoUpdate();
+            }
+            updateTimes();
+        });
+    </script>
+</body>
+</html>
