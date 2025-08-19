@@ -164,20 +164,19 @@
         .clock-face {
             width: 100%;
             height: 100%;
+            position: relative;
         }
-
-        /* --- START: CSS FIX FOR CLOCK NUMBERS --- */
+        
         .clock-number {
             position: absolute;
             font-size: 1.2em;
             font-weight: 500;
+            color: #333;
         }
-
         .clock-number-12 { top: 10px; left: 50%; transform: translateX(-50%); }
-        .clock-number-6 { bottom: 10px; left: 50%; transform: translateX(-50%); }
-        .clock-number-9 { left: 15px; top: 50%; transform: translateY(-50%); }
-        .clock-number-3 { right: 15px; top: 50%; transform: translateY(-50%); }
-        /* --- END: CSS FIX FOR CLOCK NUMBERS --- */
+        .clock-number-6  { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .clock-number-9  { left: 15px; top: 50%; transform: translateY(-50%); }
+        .clock-number-3  { right: 15px; top: 50%; transform: translateY(-50%); }
 
         .hand {
             position: absolute;
