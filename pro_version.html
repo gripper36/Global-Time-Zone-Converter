@@ -4,646 +4,550 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Time Zone Converter Pro</title>
+    <script src="city_database.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
-            --primary-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-bg: rgba(255, 255, 255, 0.95);
+            --bg-color: #f0f2f5;
+            --main-gradient-start: #6a82fb;
+            --main-gradient-end: #fc5c7d;
+            --card-bg: #ffffff;
             --text-color: #333;
-            --accent-color: #667eea;
-            --clock-bg: rgba(255, 255, 255, 0.9);
-            --hour-hand: #2c3e50;
-            --minute-hand: #3498db;
-            --second-hand: #e74c3c;
-            --border-radius: 20px;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --light-text-color: #666;
+            --primary-color: #4a69bd;
+            --secondary-color: #f0f2f5;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --business-hours-bg: #e6f7f0;
+            --business-hours-color: #0b844b;
+            --outside-hours-bg: #fbe9e9;
+            --outside-hours-color: #c93434;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--primary-bg);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
             color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .header {
+        header {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--main-gradient-start), var(--main-gradient-end));
+            border-radius: 12px;
             text-align: center;
-            margin-bottom: 30px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        h1 {
             color: white;
-            position: relative;
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 600;
         }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 10px;
-        }
-
-        .main-controls {
-            background: var(--secondary-bg);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-        }
-
-        .mode-selector {
+        
+        .control-panel {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow-color);
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
+            align-items: center;
         }
 
-        .mode-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            background: rgba(102, 126, 234, 0.1);
-            color: var(--accent-color);
+        .mode-selector button {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            margin: 0 5px;
             font-weight: 600;
         }
 
-        .mode-btn.active {
-            background: var(--accent-color);
+        .mode-selector button.active {
+            background-color: var(--primary-color);
             color: white;
-            transform: translateY(-2px);
+            border-color: var(--primary-color);
         }
 
-        .clocks-container {
+        .clock-grid {
             display: grid;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .dual-mode {
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        }
-
-        .triple-mode {
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .clock-card {
-            background: var(--clock-bg);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s ease;
+        .clock-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px var(--shadow-color);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s;
         }
-        
-        .clock-card-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .clock-card:hover {
+        .clock-container:hover {
             transform: translateY(-5px);
         }
-
-        .city-search-wrapper {
+        
+        .search-wrapper {
             position: relative;
+            width: 100%;
+            max-width: 280px;
         }
 
         .city-search {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        .city-search:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .search-suggestions {
-            position: absolute;
-            top: 50px;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .suggestion-item {
-            padding: 12px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            text-align: left;
-        }
-
-        .suggestion-item:hover {
-            background-color: #f5f5f5;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
         }
         
-        .analog-clock-container {
-            flex-grow: 1;
+        .search-results {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-results div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .search-results div:hover {
+            background-color: #f0f0f0;
+        }
+
+        .analog-clock-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px 0;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
         }
 
         .analog-clock {
-            width: 200px;
-            height: 200px;
-            margin: 20px auto;
-            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 5px solid #333;
             border-radius: 50%;
-            background: white;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
-
+        
         .clock-face {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            position: relative;
         }
 
-        .clock-hand {
+        .clock-number {
             position: absolute;
-            transform-origin: bottom center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .clock-number-12 { transform: translateY(5%); }
+        .clock-number-3 { transform: translateX(42.5%) translateY(-52.5%) rotate(90deg); }
+        .clock-number-6 { transform: translateY(-110%); }
+        .clock-number-9 { transform: translateX(-42.5%) translateY(-52.5%) rotate(-90deg); }
+
+        .hand {
+            position: absolute;
+            width: 50%;
+            height: 6px;
+            background: #333;
+            top: 50%;
+            transform-origin: 100%;
+            transform: translateY(-50%) rotate(90deg);
+            transition: transform 0.5s cubic-bezier(0.4, 2.3, 0.6, 1);
+            border-radius: 3px 0 0 3px;
         }
 
         .hour-hand {
-            width: 4px;
-            height: 60px;
-            background: var(--hour-hand);
-            top: 40px;
-            left: 50%;
-            margin-left: -2px;
-            border-radius: 2px;
+            height: 6px;
+            width: 35%;
+            left: 15%;
+            background: #333;
         }
 
         .minute-hand {
-            width: 3px;
-            height: 80px;
-            background: var(--minute-hand);
-            top: 20px;
-            left: 50%;
-            margin-left: -1.5px;
-            border-radius: 1.5px;
+            height: 4px;
+            width: 45%;
+            left: 5%;
+            background: #444;
         }
 
         .second-hand {
-            width: 1px;
-            height: 90px;
-            background: var(--second-hand);
-            top: 10px;
-            left: 50%;
-            margin-left: -0.5px;
+            height: 2px;
+            width: 48%;
+            left: 2%;
+            background: #e74c3c;
         }
 
-        .clock-center {
+        .center-dot {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 12px;
             height: 12px;
-            background: var(--second-hand);
+            background: #e74c3c;
+            border: 2px solid white;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
         }
-        
-        .number-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            text-align: center;
-        }
 
-        .number {
-            display: inline-block;
-            padding-top: 8px; /* Pushes number from top edge */
-            font-size: 1.1rem;
+        .digital-clock {
+            font-size: 2.5em;
             font-weight: 500;
-            color: var(--hour-hand);
-        }
-
-        .time-display {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-top: 15px;
+            margin-bottom: 5px;
+            color: var(--primary-color);
         }
 
         .date-display {
-            font-size: 1rem;
-            color: #666;
-            margin-top: 10px;
+            font-size: 1.1em;
+            color: var(--light-text-color);
+            margin-bottom: 15px;
         }
 
-        .business-hours {
-            margin-top: 15px;
-            padding: 8px 12px;
+        .business-hours-indicator {
+            padding: 8px 15px;
             border-radius: 20px;
-            font-size: 14px;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .business-open {
-            background: rgba(46, 204, 113, 0.2);
-            color: #27ae60;
+        .business-hours-indicator.business-hours {
+            background-color: var(--business-hours-bg);
+            color: var(--business-hours-color);
         }
 
-        .business-closed {
-            background: rgba(231, 76, 0, 0.2);
-            color: #c0392b;
-        }
-
-        .time-slider-container {
-            background: var(--secondary-bg);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-        }
-
-        .time-slider {
-            width: 100%;
-            margin: 20px 0;
-            -webkit-appearance: none;
-            height: 8px;
-            border-radius: 4px;
-            background: #e0e0e0;
-            outline: none;
-        }
-
-        .time-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        .business-hours-indicator.outside-hours {
+            background-color: var(--outside-hours-bg);
+            color: var(--outside-hours-color);
         }
         
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            justify-content: center;
+        .time-explorer {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            text-align: center;
         }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
+        .time-explorer h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .time-explorer p {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--light-text-color);
+        }
+
+        #time-slider {
+            width: 100%;
+            max-width: 500px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
         }
 
-        .btn-primary {
-            background: var(--accent-color);
+        #reset-time-btn {
+            background-color: var(--primary-color);
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            font-weight: 600;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
+        #reset-time-btn:hover {
+            opacity: 0.9;
         }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            .header h1 {
-                font-size: 2rem;
-            }
-            .analog-clock {
-                width: 150px;
-                height: 150px;
-            }
-            .hour-hand { width: 3px; height: 45px; top: 30px; margin-left: -1.5px; }
-            .minute-hand { width: 2px; height: 60px; top: 15px; margin-left: -1px; }
-            .second-hand { width: 1px; height: 65px; top: 10px; margin-left: -0.5px; }
-            .number { padding-top: 5px; font-size: 1rem; }
-
-            .mode-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
+        
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header>
             <h1>Global Time Zone Converter Pro</h1>
-        </div>
+        </header>
 
-        <div class="main-controls">
+        <div class="control-panel">
             <div class="mode-selector">
-                <button class="mode-btn active" onclick="setMode('dual', event)">Dual Cities</button>
-                <button class="mode-btn" onclick="setMode('triple', event)">Triple Cities</button>
+                <button id="dual-mode-btn" class="active">Dual Cities</button>
+                <button id="triple-mode-btn">Triple Cities</button>
             </div>
         </div>
 
-        <div class="clocks-container dual-mode" id="clocksContainer">
-            <!-- Clock cards will be generated by JavaScript -->
+        <div class="clock-grid">
+            <!-- Clock 1 -->
+            <div class="clock-container" data-id="0">
+                <div class="search-wrapper">
+                    <input type="text" class="city-search" placeholder="Search for a city...">
+                    <div class="search-results"></div>
+                </div>
+                <div class="analog-clock-wrapper">
+                    <div class="analog-clock">
+                        <div class="clock-face">
+                            <div class="clock-number clock-number-12">12</div>
+                            <div class="clock-number clock-number-3">3</div>
+                            <div class="clock-number clock-number-6">6</div>
+                            <div class="clock-number clock-number-9">9</div>
+                        </div>
+                        <div class="hand hour-hand"></div>
+                        <div class="hand minute-hand"></div>
+                        <div class="hand second-hand"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                </div>
+                <div class="digital-clock">00:00:00</div>
+                <div class="date-display">Monday, January 1</div>
+                <div class="business-hours-indicator">...</div>
+            </div>
+            <!-- Clock 2 -->
+            <div class="clock-container" data-id="1">
+                <div class="search-wrapper">
+                    <input type="text" class="city-search" placeholder="Search for a city...">
+                    <div class="search-results"></div>
+                </div>
+                <div class="analog-clock-wrapper">
+                    <div class="analog-clock">
+                         <div class="clock-face">
+                            <div class="clock-number clock-number-12">12</div>
+                            <div class="clock-number clock-number-3">3</div>
+                            <div class="clock-number clock-number-6">6</div>
+                            <div class="clock-number clock-number-9">9</div>
+                        </div>
+                        <div class="hand hour-hand"></div>
+                        <div class="hand minute-hand"></div>
+                        <div class="hand second-hand"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                </div>
+                <div class="digital-clock">00:00:00</div>
+                <div class="date-display">Monday, January 1</div>
+                <div class="business-hours-indicator">...</div>
+            </div>
+            <!-- Clock 3 -->
+            <div class="clock-container" data-id="2" style="display: none;">
+                <div class="search-wrapper">
+                    <input type="text" class="city-search" placeholder="Search for a city...">
+                    <div class="search-results"></div>
+                </div>
+                <div class="analog-clock-wrapper">
+                    <div class="analog-clock">
+                         <div class="clock-face">
+                            <div class="clock-number clock-number-12">12</div>
+                            <div class="clock-number clock-number-3">3</div>
+                            <div class="clock-number clock-number-6">6</div>
+                            <div class="clock-number clock-number-9">9</div>
+                        </div>
+                        <div class="hand hour-hand"></div>
+                        <div class="hand minute-hand"></div>
+                        <div class="hand second-hand"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                </div>
+                <div class="digital-clock">00:00:00</div>
+                <div class="date-display">Monday, January 1</div>
+                <div class="business-hours-indicator">...</div>
+            </div>
         </div>
 
-        <div class="time-slider-container">
-            <h3>Time Explorer</h3>
+        <div class="time-explorer">
+            <h2>Time Explorer</h2>
             <p>Drag the slider to explore different times of day</p>
-            <input type="range" class="time-slider" min="0" max="1439" value="720" oninput="updateTimeFromSlider(this.value)">
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="setToCurrentTime()">Reset to Current Time</button>
-            </div>
+            <input type="range" id="time-slider" min="-12" max="12" value="0" step="1">
+            <button id="reset-time-btn">Reset to Current Time</button>
         </div>
     </div>
 
-    <!-- IMPORTANT: Load the city database BEFORE our main script file -->
-    <script src="city_database.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const searchInputs = document.querySelectorAll('.city-search');
+    const searchResultsDivs = document.querySelectorAll('.search-results');
+    const clockContainers = document.querySelectorAll('.clock-container');
     
-    <script>
-        // --- GLOBAL VARIABLES ---
-        let currentMode = 'dual';
-        let selectedCities = [null, null, null];
-        let isLiveTime = true;
-        let customTime = null;
-        let clockUpdateInterval = null;
+    const timeSlider = document.getElementById('time-slider');
+    const resetTimeBtn = document.getElementById('reset-time-btn');
+    const dualModeBtn = document.getElementById('dual-mode-btn');
+    const tripleModeBtn = document.getElementById('triple-mode-btn');
 
-        // --- INITIALIZATION ---
-        function init() {
-            // The cityDatabase is now loaded from the external file
-            cityDatabase.sort((a, b) => a.city.localeCompare(b.city));
-            
-            createClockCards(2);
-            selectCity('London', 'Europe/London', 0);
-            selectCity('New York', 'America/New_York', 1);
-            startClock();
-            setToCurrentTime();
-            console.log("✅ App initialized with external city database.");
-        }
+    let mode = 2; // 2 for dual, 3 for triple
+    let activeTimezones = [];
+    let timeOffsetHours = 0;
+    let clockInterval;
 
-        function createClockCards(count) {
-            const container = document.getElementById('clocksContainer');
-            container.innerHTML = '';
-            for (let i = 0; i < count; i++) {
-                const clockCard = document.createElement('div');
-                clockCard.className = 'clock-card';
-                clockCard.setAttribute('data-city-index', i);
-                clockCard.innerHTML = `
-                    <div class="city-search-wrapper">
-                        <input type="text" class="city-search" placeholder="Type a city or airport code..." oninput="searchCity(this, ${i})">
-                        <div class="search-suggestions"></div>
-                    </div>
-                    <div class="clock-card-content">
-                        <div class="analog-clock-container">
-                             <div class="analog-clock">
-                                <div class="clock-face">
-                                    <div class="clock-hand hour-hand"></div>
-                                    <div class="clock-hand minute-hand"></div>
-                                    <div class="clock-hand second-hand"></div>
-                                    <div class="clock-center"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="time-display">--:--:--</div>
-                            <div class="date-display">Select a city</div>
-                            <div class="business-hours business-closed">...</div>
-                        </div>
-                    </div>
-                `;
-                createClockNumbers(clockCard);
-                container.appendChild(clockCard);
-            }
-        }
+    function init() {
+        // Set default cities
+        setCity(0, 'Manchester, UK');
+        setCity(1, 'Austin, TX USA');
+        setCity(2, 'Gold Coast, QLD Australia');
 
-        // --- MODE MANAGEMENT ---
-        function setMode(mode, event) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const container = document.getElementById('clocksContainer');
-            container.className = `clocks-container ${mode}-mode`;
-            
-            const cityCount = (mode === 'triple') ? 3 : 2;
-            createClockCards(cityCount);
+        searchInputs.forEach((input, index) => {
+            input.addEventListener('input', () => handleSearch(input, index));
+            input.addEventListener('focus', () => handleSearch(input, index));
+        });
 
-            const oldCity1 = selectedCities[0];
-            const oldCity2 = selectedCities[1];
-            selectedCities = [null, null, null];
-            if (oldCity1) selectCity(oldCity1.name, oldCity1.timezone, 0);
-            if (oldCity2) selectCity(oldCity2.name, oldCity2.timezone, 1);
-            if (mode === 'triple') {
-                selectCity('Tokyo', 'Asia/Tokyo', 2);
-            }
-            
-            updateAllClocks();
-        }
-
-        // --- CITY SEARCH AND SELECTION ---
-        function searchCity(input, cityIndex) {
-            const query = input.value.toLowerCase();
-            const suggestions = input.nextElementSibling;
-
-            if (query.length < 2) {
-                suggestions.style.display = 'none';
-                return;
-            }
-
-            const matches = cityDatabase.filter(entry => 
-                entry.city.toLowerCase().includes(query) ||
-                (entry.code && entry.code.toLowerCase().includes(query)) ||
-                entry.country.toLowerCase().includes(query)
-            ).slice(0, 10);
-
-            if (matches.length > 0) {
-                suggestions.innerHTML = matches.map(city => 
-                    `<div class="suggestion-item" onclick="selectCity('${city.city}', '${city.timezone}', ${cityIndex})">
-                        <strong>${city.city}, ${city.country}</strong> ${city.code ? `(${city.code})` : ''}
-                    </div>`
-                ).join('');
-                suggestions.style.display = 'block';
-            } else {
-                suggestions.innerHTML = '<div class="suggestion-item" style="color: #999;">No cities found.</div>';
-                suggestions.style.display = 'block';
-            }
-        }
-
-        function selectCity(name, timezone, cityIndex) {
-            selectedCities[cityIndex] = { name, timezone };
-            
-            const clockCard = document.querySelector(`[data-city-index="${cityIndex}"]`);
-            if (clockCard) {
-                const input = clockCard.querySelector('.city-search');
-                const suggestions = clockCard.querySelector('.search-suggestions');
-                input.value = name;
-                suggestions.style.display = 'none';
-                input.blur();
-            }
-            
-            updateAllClocks();
-        }
-        
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.city-search-wrapper')) {
-                document.querySelectorAll('.search-suggestions').forEach(s => s.style.display = 'none');
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('city-search')) {
+                searchResultsDivs.forEach(div => div.innerHTML = '');
             }
         });
 
-        // --- CLOCK LOGIC ---
-        function createClockNumbers(clockCard) {
-            const clockFace = clockCard.querySelector('.clock-face');
-            if (!clockFace) return;
+        timeSlider.addEventListener('input', () => {
+            timeOffsetHours = parseInt(timeSlider.value);
+            updateClocks();
+        });
 
-            for (let i = 1; i <= 12; i++) {
-                const rotation = i * 30;
-                const numberContainer = document.createElement('div');
-                numberContainer.className = 'number-container';
-                numberContainer.style.transform = `rotate(${rotation}deg)`;
-                
-                const numberSpan = document.createElement('span');
-                numberSpan.className = 'number';
-                numberSpan.textContent = i;
-                numberSpan.style.transform = `rotate(${-rotation}deg)`;
+        resetTimeBtn.addEventListener('click', () => {
+            timeSlider.value = 0;
+            timeOffsetHours = 0;
+            updateClocks();
+        });
+        
+        dualModeBtn.addEventListener('click', () => setMode(2));
+        tripleModeBtn.addEventListener('click', () => setMode(3));
+        
+        // Start the main clock interval
+        if (clockInterval) clearInterval(clockInterval);
+        clockInterval = setInterval(updateClocks, 1000);
+        updateClocks();
+        updateClockDisplay();
+    }
 
-                numberContainer.appendChild(numberSpan);
-                clockFace.appendChild(numberContainer);
-            }
+    function setMode(newMode) {
+        mode = newMode;
+        dualModeBtn.classList.toggle('active', mode === 2);
+        tripleModeBtn.classList.toggle('active', mode === 3);
+        updateClockDisplay();
+    }
+
+    function handleSearch(input, index) {
+        const query = input.value.toLowerCase();
+        const resultsContainer = searchResultsDivs[index];
+        resultsContainer.innerHTML = '';
+
+        if (query.length < 2) return;
+
+        const filteredCities = city_database.filter(cityData =>
+            `${cityData.city}, ${cityData.country}`.toLowerCase().includes(query) ||
+            `${cityData.city}, ${cityData.code} ${cityData.country}`.toLowerCase().includes(query)
+        ).slice(0, 50);
+
+        filteredCities.forEach(cityData => {
+            const div = document.createElement('div');
+            div.textContent = `${cityData.city}, ${cityData.code} ${cityData.country}`;
+            div.onclick = () => {
+                const searchString = `${cityData.city}, ${cityData.country}`;
+                setCity(index, searchString);
+                resultsContainer.innerHTML = '';
+            };
+            resultsContainer.appendChild(div);
+        });
+    }
+
+    function setCity(index, searchString) {
+        const cityData = city_database.find(c => 
+            `${c.city}, ${c.country}`.toLowerCase() === searchString.toLowerCase() ||
+            `${c.city}, ${c.code} ${c.country}`.toLowerCase() === searchString.toLowerCase()
+        );
+
+        if (cityData) {
+            searchInputs[index].value = cityData.city;
+            activeTimezones[index] = cityData.timezone;
+            updateClocks();
+            updateClockDisplay();
         }
+    }
+    
+    function updateClockDisplay() {
+        const clockContainers = document.querySelectorAll('.clock-container');
+        clockContainers.forEach((container, index) => {
+            container.style.display = index < mode ? 'flex' : 'none';
+        });
+    }
+    
+    function updateClocks() {
+        const now = new Date();
+        now.setHours(now.getHours() + timeOffsetHours);
 
-        function startClock() {
-            if (clockUpdateInterval) {
-                clearInterval(clockUpdateInterval);
-            }
-            clockUpdateInterval = setInterval(() => {
-                if (isLiveTime) {
-                    const now = new Date();
-                    // Smooth hand transition for seconds
-                    const seconds = now.getSeconds();
-                    const secondAngle = seconds * 6;
-                    document.querySelectorAll('.second-hand').forEach(hand => {
-                        // Reset transition for the jump from 59 to 0 to avoid reverse-spin animation
-                        if (seconds === 0) {
-                            hand.style.transition = 'none';
-                        } else {
-                            // Use a very fast transition for a ticking effect
-                            hand.style.transition = 'transform 0.05s linear';
-                        }
-                        hand.style.transform = `rotate(${secondAngle}deg)`;
-                    });
-                    
-                    updateAllClocks();
-                }
-            }, 1000);
-        }
+        clockContainers.forEach((container, index) => {
+            const timezone = activeTimezones[index];
+            if (!timezone) return;
 
-        function updateAllClocks() {
-            const baseTime = isLiveTime ? new Date() : customTime;
-            selectedCities.forEach((city, index) => {
-                if (city) {
-                    updateClock(index, city, baseTime);
-                }
-            });
-        }
+            const timeOptions = { timeZone: timezone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const dateOptions = { timeZone: timezone, weekday: 'long', month: 'long', day: 'numeric' };
 
-        function updateClock(index, city, baseTime) {
-            const clockCard = document.querySelector(`[data-city-index="${index}"]`);
-            if (!clockCard) return;
-
-            try {
-                const cityTime = new Date(baseTime.toLocaleString("en-US", { timeZone: city.timezone }));
-                
-                clockCard.querySelector('.time-display').textContent = cityTime.toLocaleTimeString('en-GB');
-                clockCard.querySelector('.date-display').textContent = cityTime.toLocaleDateString('en-US', {
-                    weekday: 'long', month: 'long', day: 'numeric'
-                });
-
-                const hour = cityTime.getHours();
-                const businessHoursEl = clockCard.querySelector('.business-hours');
-                if (hour >= 9 && hour < 17) {
-                    businessHoursEl.textContent = '🏢 Business Hours';
-                    businessHoursEl.className = 'business-hours business-open';
-                } else {
-                    businessHoursEl.textContent = '🏠 Outside Business Hours';
-                    businessHoursEl.className = 'business-hours business-closed';
-                }
-
-                const hours = cityTime.getHours();
-                const minutes = cityTime.getMinutes();
-                const seconds = cityTime.getSeconds();
-                
-                const hourAngle = (hours % 12) * 30 + minutes * 0.5;
-                const minuteAngle = minutes * 6;
-                
-                // Second hand is handled in startClock for smoothness, but we must set it here for non-live slider updates
-                if (!isLiveTime) {
-                    const secondAngle = seconds * 6;
-                    clockCard.querySelector('.second-hand').style.transform = `rotate(${secondAngle}deg)`;
-                }
-                
-                clockCard.querySelector('.hour-hand').style.transform = `rotate(${hourAngle}deg)`;
-                clockCard.querySelector('.minute-hand').style.transform = `rotate(${minuteAngle}deg)`;
-                
-            } catch(e) {
-                console.error("Error updating clock for timezone:", city.timezone, e);
-                clockCard.querySelector('.time-display').textContent = 'Error';
-            }
-        }
-
-        // --- TIME SLIDER ---
-        function updateTimeFromSlider(minutesPastMidnight) {
-            isLiveTime = false;
-            if(clockUpdateInterval) clearInterval(clockUpdateInterval);
+            const timeString = new Intl.DateTimeFormat('en-GB', timeOptions).format(now);
+            const dateString = new Intl.DateTimeFormat('en-US', dateOptions).format(now);
             
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            customTime = new Date(today.getTime() + minutesPastMidnight * 60 * 1000);
-            
-            updateAllClocks();
-        }
+            const [hour, minute, second] = timeString.split(':').map(Number);
 
-        function setToCurrentTime() {
-            isLiveTime = true;
-            const now = new Date();
-            const slider = document.querySelector('.time-slider');
-            if (slider) {
-                slider.value = now.getHours() * 60 + now.getMinutes();
+            // Update Digital Clock
+            container.querySelector('.digital-clock').textContent = timeString;
+            container.querySelector('.date-display').textContent = dateString;
+
+            // Update Analog Clock
+            const hourDeg = (hour % 12) * 30 + minute * 0.5;
+            const minuteDeg = minute * 6 + second * 0.1;
+            const secondDeg = second * 6;
+
+            container.querySelector('.hour-hand').style.transform = `translateY(-50%) rotate(${hourDeg + 90}deg)`;
+            container.querySelector('.minute-hand').style.transform = `translateY(-50%) rotate(${minuteDeg + 90}deg)`;
+            container.querySelector('.second-hand').style.transform = `translateY(-50%) rotate(${secondDeg + 90}deg)`;
+
+            // Update Business Hours Indicator
+            const indicator = container.querySelector('.business-hours-indicator');
+            const isBusinessHours = hour >= 9 && hour < 17;
+            if (isBusinessHours) {
+                indicator.textContent = 'Business Hours';
+                indicator.className = 'business-hours-indicator business-hours';
+            } else {
+                indicator.textContent = 'Outside Business Hours';
+                indicator.className = 'business-hours-indicator outside-hours';
             }
-            startClock(); // Resume live updates
-            updateAllClocks();
-        }
-
-        // --- RUN ON PAGE LOAD ---
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+        });
+    }
+    
+    init();
+});
+</script>
 </body>
 </html>
