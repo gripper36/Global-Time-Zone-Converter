@@ -191,7 +191,6 @@
         .clock-hand {
             position: absolute;
             transform-origin: bottom center;
-            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .hour-hand {
@@ -235,12 +234,21 @@
             z-index: 10;
         }
         
-        .number {
+        .number-container {
             position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            text-align: center;
+        }
+
+        .number {
+            display: inline-block;
+            padding-top: 8px; /* Pushes number from top edge */
             font-size: 1.1rem;
             font-weight: 500;
             color: var(--hour-hand);
-            transform: translate(-50%, -50%);
         }
 
         .time-display {
@@ -342,6 +350,7 @@
             .hour-hand { width: 3px; height: 45px; top: 30px; margin-left: -1.5px; }
             .minute-hand { width: 2px; height: 60px; top: 15px; margin-left: -1px; }
             .second-hand { width: 1px; height: 65px; top: 10px; margin-left: -0.5px; }
+            .number { padding-top: 5px; font-size: 1rem; }
 
             .mode-selector {
                 flex-direction: column;
@@ -561,20 +570,19 @@
             const clockFace = clockCard.querySelector('.clock-face');
             if (!clockFace) return;
 
-            const radius = 85; // Distance of numbers from center
             for (let i = 1; i <= 12; i++) {
-                const number = document.createElement('div');
-                number.className = 'number';
-                number.textContent = i;
+                const rotation = i * 30;
+                const numberContainer = document.createElement('div');
+                numberContainer.className = 'number-container';
+                numberContainer.style.transform = `rotate(${rotation}deg)`;
                 
-                const angle = (i - 3) * 30 * (Math.PI / 180); // Angle in radians, adjusted to start at 3 o'clock
-                const x = 100 + radius * Math.cos(angle); // 100 is half of the clock width
-                const y = 100 + radius * Math.sin(angle);
-                
-                number.style.left = `${x}px`;
-                number.style.top = `${y}px`;
-                
-                clockFace.appendChild(number);
+                const numberSpan = document.createElement('span');
+                numberSpan.className = 'number';
+                numberSpan.textContent = i;
+                numberSpan.style.transform = `rotate(${-rotation}deg)`;
+
+                numberContainer.appendChild(numberSpan);
+                clockFace.appendChild(numberContainer);
             }
         }
 
@@ -584,6 +592,21 @@
             }
             clockUpdateInterval = setInterval(() => {
                 if (isLiveTime) {
+                    const now = new Date();
+                    // Smooth hand transition for seconds
+                    const seconds = now.getSeconds();
+                    const secondAngle = seconds * 6;
+                    document.querySelectorAll('.second-hand').forEach(hand => {
+                        // Reset transition for the jump from 59 to 0
+                        if (seconds === 0) {
+                            hand.style.transition = 'none';
+                        } else {
+                            hand.style.transition = 'transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                        }
+                        hand.style.transform = `rotate(${secondAngle}deg)`;
+                    });
+                    
+                    // Update main clock logic less frequently if needed, or every second
                     updateAllClocks();
                 }
             }, 1000);
@@ -626,11 +649,15 @@
                 
                 const hourAngle = (hours % 12) * 30 + minutes * 0.5;
                 const minuteAngle = minutes * 6;
-                const secondAngle = seconds * 6;
+                // Second hand is handled in startClock for smoothness, but we set it here for non-live updates
+                if (!isLiveTime) {
+                    const secondAngle = seconds * 6;
+                    clockCard.querySelector('.second-hand').style.transform = `rotate(${secondAngle}deg)`;
+                }
                 
                 clockCard.querySelector('.hour-hand').style.transform = `rotate(${hourAngle}deg)`;
                 clockCard.querySelector('.minute-hand').style.transform = `rotate(${minuteAngle}deg)`;
-                clockCard.querySelector('.second-hand').style.transform = `rotate(${secondAngle}deg)`;
+                
             } catch(e) {
                 console.error("Error updating clock for timezone:", city.timezone, e);
                 clockCard.querySelector('.time-display').textContent = 'Error';
@@ -640,7 +667,7 @@
         // --- TIME SLIDER ---
         function updateTimeFromSlider(minutesPastMidnight) {
             isLiveTime = false;
-            clearInterval(clockUpdateInterval);
+            clearInterval(clockUpdateInterval); // Stop live updates when scrubbing
             
             const today = new Date();
             today.setHours(0, 0, 0, 0);
