@@ -1,4 +1,4 @@
-const city_database = [
+const cityDatabase = [
   { city: "Adelaide", country: "Australia", code: "SA", timezone: "Australia/Adelaide" },
   { city: "Albany", country: "Australia", code: "WA", timezone: "Australia/Perth" },
   { city: "Alice Springs", country: "Australia", code: "NT", timezone: "Australia/Darwin" },
