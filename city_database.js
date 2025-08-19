@@ -1,4 +1,5 @@
-const cityDatabase = [
+// Variable name is 'city_database' (snake_case) to match the variable used in pro_version.html
+const city_database = [
   { city: "Adelaide", country: "Australia", code: "SA", timezone: "Australia/Adelaide" },
   { city: "Albany", country: "Australia", code: "WA", timezone: "Australia/Perth" },
   { city: "Alice Springs", country: "Australia", code: "NT", timezone: "Australia/Darwin" },
